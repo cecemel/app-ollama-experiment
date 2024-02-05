@@ -8,6 +8,4 @@ services:
     volumes:
       - ./config/ollama:/root/config
       - ./data:/root/.ollama
-    ports:
-      - 80:11434
     entrypoint: ["/bin/bash", "/root/config/start.sh"]
