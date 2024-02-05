@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  ollama:
+    image: ollama/ollama:0.1.23
+    environment:
+      MODEL: "mistral"
+    volumes:
+      - ./config/ollama:/root/config
+      - ./data:/root/.ollama
+    ports:
+      - 80:11434
+    entrypoint: ["/bin/bash", "/root/config/start.sh"]
