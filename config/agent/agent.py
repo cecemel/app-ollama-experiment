@@ -7,7 +7,8 @@ from ddgs import DDGS
 
 # --- TOOL 1: WEB SEARCH ---
 def search_web(query: str):
-    """Search the web for current information and return top results."""
+    """Use this to find current information, news, or facts on any topic by searching the web via DuckDuckGo.
+    Returns titles, snippets, and URLs for the top results. Use this first when you don't have a specific URL yet."""
     print(f"  [System: Searching for '{query}'...]", flush=True)
     results = DDGS().text(query, max_results=3)
     return "\n".join([f"{r['title']}: {r['body']} (URL: {r['href']})" for r in results])
@@ -15,21 +16,13 @@ def search_web(query: str):
 
 # --- TOOL 2: URL SCRAPER ---
 def get_url_content(url: str):
-    """Scrape the text content from a specific website URL."""
+    """Use this to read the full text content of a specific webpage. Provide a complete URL including https://.
+    Use this after search_web to read the actual article or page behind a search result, or when the user gives you a direct URL."""
     print(f"  [System: Reading content from {url}...]", flush=True)
     try:
         headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-            'Accept-Language': 'nl-BE,nl;q=0.9,en-US;q=0.7,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
-            'DNT': '1',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8'
         }
         session = requests.Session()
         session.headers.update(headers)
@@ -49,7 +42,8 @@ def get_url_content(url: str):
 
 # --- TOOL 3: API FETCHER ---
 def fetch_api_data(endpoint_url: str):
-    """Fetch raw data from a JSON API endpoint."""
+    """Use this to fetch structured data from a JSON API endpoint. Provide a complete URL including https://.
+    Use this when the target URL is a REST API or returns JSON rather than an HTML page."""
     print(f"  [System: Crawling API {endpoint_url}...]", flush=True)
     try:
         response = requests.get(endpoint_url)
@@ -62,7 +56,7 @@ def run_agent():
     model = os.environ['MODEL']
     tools_list = [search_web, get_url_content, fetch_api_data]
 
-    messages = [{"role": "system", "content": "You are an advanced researcher. Use tools to find info, read pages, or crawl APIs as needed."}]
+    messages = [{"role": "system", "content": "You are here to help for more info. You have internet connectivity. Use tools to find info, read pages, or crawl APIs as needed."}]
 
     print(f"--- Agent Active (model: {model}) ---", flush=True)
     print(f"Type 'exit' or 'quit' to stop.\n", flush=True)
