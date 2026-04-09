@@ -4,7 +4,8 @@ services:
   ollama:
     build: ./config/ollama/
     environment:
-      #https://ollama.ai/library
+      # see: https://ollama.ai/library
+      # Possible models:
       #MODEL: "mistral"
       #MODEL: "llama2-uncensored"
       #MODEL: "codellama"
