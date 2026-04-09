@@ -2,9 +2,13 @@ version: '3.7'
 
 services:
   ollama:
-    image: ollama/ollama:0.1.23
+    image: ollama/ollama:0.20.3
     environment:
-      MODEL: "mistral"
+      #https://ollama.ai/library
+      #MODEL: "mistral"
+      #MODEL: "llama2-uncensored"
+      #MODEL: "codellama"
+      MODEL: "gemma4:e4b"
     volumes:
       - ./config/ollama:/root/config
       - ./data:/root/.ollama
