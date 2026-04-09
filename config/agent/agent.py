@@ -1,5 +1,7 @@
 import os
 import re
+import subprocess
+import tempfile
 import ollama
 import requests
 from bs4 import BeautifulSoup, NavigableString
@@ -214,19 +216,66 @@ def fetch_news_article(url: str):
 
 
 # --- TOOL 5: JSON API FETCHER ---
-def fetch_api_data(endpoint_url: str):
+def fetch_api_data(endpoint_url: str, headers: dict = {}):
     """Fetch structured data from a JSON API endpoint.
     Use when the URL returns JSON rather than an HTML page.
-    Use peek_url first if unsure whether the URL is an API or a webpage."""
-    print(f"  [System: Fetching API {endpoint_url}...]", flush=True)
+    Use peek_url first if unsure whether the URL is an API or a webpage.
+    Pass any required headers (e.g. Authorization, Accept, API keys) via the headers dict."""
+    print(f"  [System: Fetching API {endpoint_url} headers={headers}...]", flush=True)
     try:
-        response = requests.get(endpoint_url)
+        response = requests.get(endpoint_url, headers=headers)
         return str(response.json())[:2000]
     except Exception as e:
         return f"Error fetching API: {e}"
 
 
-TOOLS = [search_web, peek_url, fetch_page, fetch_news_article, fetch_api_data]
+# --- TOOL 6: PYTHON EXECUTION ---
+def run_python(code: str):
+    """Write and execute arbitrary Python code. Use this to compute things, parse data,
+    process text, call APIs, or do anything easier expressed as code.
+    Basic stdlib is available, plus requests and beautifulsoup4.
+    Returns stdout + stderr. Define helper functions inline if needed."""
+    print(f"  [System: Running Python ({len(code)} chars)...]", flush=True)
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            f.write(code)
+            tmp = f.name
+        result = subprocess.run(
+            ['python', tmp], capture_output=True, text=True, timeout=30
+        )
+        os.unlink(tmp)
+        output = result.stdout
+        if result.stderr:
+            output += f"\n[stderr]\n{result.stderr}"
+        return _smart_truncate(output.strip() or "(no output)", budget=3000)
+    except subprocess.TimeoutExpired:
+        return "Error: script timed out after 30 seconds"
+    except Exception as e:
+        return f"Error running Python: {e}"
+
+
+# --- TOOL 7: SHELL EXECUTION ---
+def run_shell(command: str):
+    """Run a shell command via bash. Use this for curl requests, file operations,
+    or any shell one-liner. curl, python, and standard Unix tools are available.
+    Returns stdout + stderr combined."""
+    print(f"  [System: Running shell: {command}]", flush=True)
+    try:
+        result = subprocess.run(
+            command, shell=True, executable='/bin/bash',
+            capture_output=True, text=True, timeout=30
+        )
+        output = result.stdout
+        if result.stderr:
+            output += f"\n[stderr]\n{result.stderr}"
+        return _smart_truncate(output.strip() or "(no output)", budget=3000)
+    except subprocess.TimeoutExpired:
+        return "Error: command timed out after 30 seconds"
+    except Exception as e:
+        return f"Error running shell command: {e}"
+
+
+TOOLS = [search_web, peek_url, fetch_page, fetch_news_article, fetch_api_data, run_python, run_shell]
 FUNCTION_MAP = {fn.__name__: fn for fn in TOOLS}
 
 
@@ -243,11 +292,22 @@ def run_agent():
     )}]
 
     print(f"--- Connected Agent Active (model: {model}) ---", flush=True)
-    print("Type 'exit' or 'quit' to stop.\n", flush=True)
+    print("Type your message, then // on its own line to send. Type 'exit' or 'quit' to stop.\n", flush=True)
 
     while True:
-        print("\nType your question:", flush=True)
-        user_input = input("> ")
+        print("\nYour message (type // on its own line to send):", flush=True)
+        lines = []
+        while True:
+            try:
+                line = input()
+            except EOFError:
+                break
+            if line == "//":
+                break
+            lines.append(line)
+        user_input = "\n".join(lines).strip()
+        if not user_input:
+            continue
         if user_input.lower() in ['exit', 'quit']:
             break
         messages.append({'role': 'user', 'content': user_input})
