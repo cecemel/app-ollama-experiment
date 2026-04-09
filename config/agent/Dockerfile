@@ -9,5 +9,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY agent.py .
+COPY run /usr/local/bin/run
+RUN chmod +x /usr/local/bin/run
 
 CMD ["sleep", "infinity"]
