@@ -13,6 +13,15 @@ services:
       MODEL: "gemma4:e4b"
     volumes:
       - ./data:/root/.ollama
+  agent:
+    image: cecemel/app-ollama-experiment-agent:0.0.1
+    build: ./config/agent/
+    environment:
+      OLLAMA_HOST: "http://ollama:11434"
+      MODEL: "gemma4:e4b"
+    volumes:
+      - ./config/agent/agent.py:/app/agent.py
+
   aider:
     image: cecemel/app-ollama-experiment-aider:0.0.1
     build: ./config/aider/
