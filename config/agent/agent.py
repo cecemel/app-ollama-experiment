@@ -33,6 +33,20 @@ def _strip_noise(soup):
         tag.decompose()
 
 
+def _smart_truncate(text: str, budget: int = 4000) -> str:
+    """Truncate at a paragraph boundary within budget, keeping content from the top."""
+    if len(text) <= budget:
+        return text
+    truncated = text[:budget]
+    # Walk back to the last double newline (paragraph boundary)
+    boundary = truncated.rfind('\n\n')
+    if boundary > budget // 2:  # only use boundary if it's not too far back
+        truncated = truncated[:boundary]
+    total = len(text)
+    kept = len(truncated)
+    return truncated + f"\n\n[... {total - kept} chars truncated ...]"
+
+
 def _html_to_markdown(root):
     """Convert a BeautifulSoup element tree to markdown, preserving meaningful structure."""
     lines = []
@@ -190,9 +204,11 @@ def fetch_news_article(url: str):
         _strip_noise(soup)
         articles = soup.find_all('article')
         if articles:
-            return "\n\n---\n\n".join(_html_to_markdown(a) for a in articles)
-        root = soup.find('main') or soup.body or soup
-        return _html_to_markdown(root)
+            combined = "\n\n---\n\n".join(_html_to_markdown(a) for a in articles)
+        else:
+            root = soup.find('main') or soup.body or soup
+            combined = _html_to_markdown(root)
+        return _smart_truncate(combined)
     except Exception as e:
         return f"Error fetching news article: {e}"
 
