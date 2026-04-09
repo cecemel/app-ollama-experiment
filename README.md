@@ -44,6 +44,37 @@ services:
 
 Then `drc up -d` to apply. The override file is gitignored by convention, so it stays local.
 
+## Agent — web research CLI
+
+The `agent` service is an interactive CLI agent that can search the web, scrape URLs, and call JSON APIs to answer your questions.
+
+Start an agent session:
+
+```
+drc exec agent run
+```
+
+You'll be prompted to type a question. The agent will decide which tools to use, execute them, and summarize the results. You can see what it's doing in real time — tool calls, raw output, and model status are all printed as it works.
+
+Type `exit` or `quit` to stop.
+
+### Accessing the raw model directly
+
+To chat with the model directly via the Ollama CLI (no tools, no agent wrapper):
+
+```
+drc exec ollama ollama run gemma4:e4b
+```
+
+Or drop into a shell first:
+
+```
+drc exec ollama bash
+ollama run gemma4:e4b
+```
+
+Type `/bye` to exit the Ollama session.
+
 ## Choosing a model
 
 Overview of available models: https://ollama.ai/library
