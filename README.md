@@ -2,6 +2,8 @@
 
 Local AI coding assistant using [Ollama](https://ollama.ai/) + [Aider](https://aider.chat/).
 
+By default runs `gemma4:e4b` (~9GB).
+
 ## Getting started
 
 ```
