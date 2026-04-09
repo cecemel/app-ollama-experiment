@@ -3,7 +3,7 @@
 Local AI experiment running two agents on top of a local [Ollama](https://ollama.ai/) model:
 
 - **Coding agent** (`aider`) — edits code in your local repos via [Aider](https://aider.chat/)
-- **Research agent** (`agent`) — answers questions using web search (DuckDuckGo), URL scraping, and JSON API calls
+- **Connected agent** (`agent`) — chat with a model that can reach out to the web when it needs to
 
 By default runs `gemma4:e4b` (~9GB).
 
@@ -47,17 +47,15 @@ services:
 
 Then `drc up -d` to apply. The override file is gitignored by convention, so it stays local.
 
-## Research agent
+## Connected agent
 
-The research agent is an interactive CLI that can search the web via DuckDuckGo, scrape URLs, and call JSON APIs to answer your questions. The model decides which tools to use based on your question.
-
-Start a session:
+An interactive CLI to chat with the model. When it needs to, it'll reach out — search DuckDuckGo, read a URL, or call an API. You can ask it anything; it figures out whether it needs the internet or not.
 
 ```
 drc exec agent run
 ```
 
-You'll see real-time output as the agent works — which tools it's calling, raw results, and when it's summarizing. Type `exit` or `quit` to stop.
+Type `exit` or `quit` to stop.
 
 ## Accessing the raw model
 
