@@ -1,4 +1,4 @@
 ollama
 requests
 beautifulsoup4
-duckduckgo_search
+ddgs

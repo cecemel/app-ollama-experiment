@@ -2,7 +2,7 @@ import os
 import ollama
 import requests
 from bs4 import BeautifulSoup
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 
 
 # --- TOOL 1: WEB SEARCH ---
@@ -18,12 +18,31 @@ def get_url_content(url: str):
     """Scrape the text content from a specific website URL."""
     print(f"  [System: Reading content from {url}...]", flush=True)
     try:
-        headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0'}
-        response = requests.get(url, timeout=10, headers=headers)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept-Language': 'nl-BE,nl;q=0.9,en-US;q=0.7,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'DNT': '1',
+        }
+        session = requests.Session()
+        session.headers.update(headers)
+        response = session.get(url, timeout=10)
         soup = BeautifulSoup(response.text, 'html.parser')
-        for script in soup(["script", "style"]):
-            script.extract()
-        return soup.get_text()[:2000]
+
+        for tag in soup(["script", "style", "noscript", "iframe"]):
+            tag.extract()
+
+        text = soup.get_text(separator="\n", strip=True)
+        # Collapse excessive blank lines
+        lines = [l for l in text.splitlines() if l.strip()]
+        return "\n".join(lines)
     except Exception as e:
         return f"Error reading URL: {e}"
 
@@ -55,7 +74,7 @@ def run_agent():
             break
         messages.append({'role': 'user', 'content': user_input})
 
-        print("  [Thinking...]", flush=True)
+        print("  [Thinking — waiting for model response...]", flush=True)
         response = ollama.chat(model=model, messages=messages, tools=tools_list)
 
         if response['message'].get('tool_calls'):
@@ -65,20 +84,26 @@ def run_agent():
                 'fetch_api_data': fetch_api_data,
             }
 
-            for tool in response['message']['tool_calls']:
+            tool_calls = response['message']['tool_calls']
+            print(f"  [Model wants to call {len(tool_calls)} tool(s)]", flush=True)
+
+            for tool in tool_calls:
                 name = tool['function']['name']
                 args = tool['function']['arguments']
+                print(f"  [Calling tool: {name} with args: {args}]", flush=True)
                 result = function_map[name](**args)
-                print(f"  [Got {len(result)} chars of data]", flush=True)
+                print(f"  [Tool returned {len(result)} chars]", flush=True)
+                print(f"  --- raw output ---\n{result}\n  ---", flush=True)
 
                 messages.append(response['message'])
                 messages.append({'role': 'tool', 'content': result})
 
-            print("  [Summarizing...]", flush=True)
+            print("  [All tools done — asking model to summarize...]", flush=True)
             final_res = ollama.chat(model=model, messages=messages)
             print(f"\nAI: {final_res['message']['content']}", flush=True)
             messages.append(final_res['message'])
         else:
+            print("  [No tools needed — responding directly]", flush=True)
             print(f"\nAI: {response['message']['content']}", flush=True)
             messages.append(response['message'])
 
