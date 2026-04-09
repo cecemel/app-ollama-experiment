@@ -2,6 +2,7 @@ version: '3.7'
 
 services:
   ollama:
+    image: cecemel/app-ollama-experiment-ollama:0.0.1
     build: ./config/ollama/
     environment:
       # see: https://ollama.ai/library
@@ -13,6 +14,7 @@ services:
     volumes:
       - ./data:/root/.ollama
   aider:
+    image: cecemel/app-ollama-experiment-aider:0.0.1
     build: ./config/aider/
     environment:
       OLLAMA_API_BASE: "http://ollama:11434"
