@@ -54,48 +54,25 @@ Then `drc up -d` to apply. The override file is gitignored by convention, so it 
 Like aider, but [opencode](https://opencode.ai/). The container idles; exec in:
 
 ```
-drc exec opencode opencode                         # interactive
-drc exec opencode opencode run "explain this repo"  # one-shot
+drc exec opencode opencode
 ```
 
-Configured by `OPENCODE_CONFIG_CONTENT` in `docker-compose.yml` (inline JSON, default `llama3.2:3b`).
+Fixed config - providers, LSP (TypeScript/JS + Python), default model - is baked into the image at
+`config/opencode/opencode.base.json`. Two knobs in `docker-compose.yml`:
 
-### Extra nodes
-#### Running locally
-To allow opencode top be agentic, the model must support tool-calling.
-Check for the `tools` tag on the model's page on the [Ollama library](https://ollama.ai/library).
-Also: `OLLAMA_CONTEXT_LENGTH: "32768"`, else it will choke.
-#### Running with Ollama-cloud
+- `OLLAMA_API_KEY` - Ollama Cloud key (put it in a `.env`); empty = local-only.
+- `OLLAMA_CLOUD_MODELS` - cloud models to register; edit the list to swap.
+
+Default is local `llama3.2:3b`. Switch per run:
+
 ```
-  services:
-    opencode:
-      environment:
-        OLLAMA_API_KEY: "<insert your API key here>"
-        OPENCODE_CONFIG_CONTENT: |
-          {
-            "model": "ollama-cloud/qwen3-coder:480b",
-            "small_model": "ollama-cloud/gpt-oss:20b",
-            "provider": {
-              "ollama": {
-                "npm": "@ai-sdk/openai-compatible",
-                "options": { "baseURL": "http://ollama:11434/v1" },
-                "models": { "llama3.2:3b": { "tools": true } }
-              },
-              "ollama-cloud": {
-                "npm": "@ai-sdk/openai-compatible",
-                "options": { "baseURL": "https://ollama.com/v1", "apiKey": "{env:OLLAMA_API_KEY}" },
-                "models": {
-                  "qwen3-coder:480b": { "tools": true },
-                  "gpt-oss:120b": { "tools": true },
-                  "glm-5.2:cloud": { "tools": true }
-                }
-              }
-            }
-          }
+drc exec opencode opencode run --model ollama/llama3.2:3b           "..."   # local
+drc exec opencode opencode run --model ollama-cloud/qwen3-coder:480b "..."  # cloud
 ```
 
-
-####
+Local needs a tool-calling model (`tools` tag on the [Ollama library](https://ollama.ai/library)); the
+`ollama` service sets `OLLAMA_CONTEXT_LENGTH=32768` or tool-calls choke. List cloud ids:
+`curl https://ollama.com/v1/models -H "Authorization: Bearer $OLLAMA_API_KEY"`.
 
 ## Connected agent
 
@@ -133,33 +110,4 @@ For the aider coding agent, also update `AIDER_MODEL` to match:
 ```yaml
     environment:
       AIDER_MODEL: "ollama/mistral"
-```
-
-## Sample docker-compose.override.yml configs
-```
-services:
-  ollama:
-    environment:
-      MODEL: "qwen3:8b"
-
-  opencode:
-    environment:
-      OPENCODE_CONFIG_CONTENT: |
-        {
-          "model": "ollama/qwen3:8b",
-          "small_model": "ollama/qwen3:8b",
-          "provider": {
-            "ollama": {
-              "npm": "@ai-sdk/openai-compatible",
-              "options": { "baseURL": "http://ollama:11434/v1" },
-              "models": { "qwen3:8b": { "tools": true } }
-            }
-          }
-        }
-    volumes:
-    - /path/to/your/repo:/workspace/repo
-
-  aider:
-    environment:
-      AIDER_MODEL: "ollama/qwen3:8b"
 ```

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "ollama/llama3.2:3b",
+  "small_model": "ollama/llama3.2:3b",
+  "lsp": {
+    "typescript": {
+      "command": ["typescript-language-server", "--stdio"],
+      "extensions": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".mts", ".cts"]
+    },
+    "pyright": {
+      "command": ["pyright-langserver", "--stdio"],
+      "extensions": [".py", ".pyi"]
+    }
+  },
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": { "baseURL": "http://ollama:11434/v1" },
+      "models": { "llama3.2:3b": { "tools": true } }
+    },
+    "ollama-cloud": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": { "baseURL": "https://ollama.com/v1", "apiKey": "{env:OLLAMA_API_KEY}" },
+      "models": {}
+    }
+  }
+}
