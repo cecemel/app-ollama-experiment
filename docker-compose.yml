@@ -33,6 +33,7 @@ services:
       OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT: "true"
       # Log full chat input/output to `docker compose logs opencode`. Set "false" to disable.
       OPENCODE_LOG_CHAT: "true"
+      CHAT_LOG_MAXLEN: "0" # unlimited chat logs in docker compose
       OLLAMA_LOCAL_MODELS: |
         {
           "llama3.2:3b": { "tools": true }
@@ -44,3 +45,8 @@ services:
           "glm-5.2": { "tools": true },
           "qwen3.6:35b":  { "tools": true }
         }
+    volumes:
+      # persist opencode state across restarts: sessions/history + auth (the db),
+      # and the auto-installed provider package. config.json is regenerated each boot.
+      - ./data/opencode/share:/root/.local/share/opencode
+      - ./data/opencode/config:/root/.config/opencode
