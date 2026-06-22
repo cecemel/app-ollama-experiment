@@ -6,6 +6,10 @@ set -e
 # the result from ~/.config/opencode/opencode.json. A bad list warns and is skipped -
 # it never crashes the container.
 mkdir -p /root/.config/opencode
+# Custom webfetch tool (normal Firefox User-Agent). The tools dir is on the mounted
+# config volume, so we drop it in at boot rather than baking it into the image path.
+mkdir -p /root/.config/opencode/tools
+cp /etc/opencode/webfetch.ts /root/.config/opencode/tools/webfetch.ts
 node -e '
 const fs = require("fs");
 const cfg = JSON.parse(fs.readFileSync("/etc/opencode/opencode.base.json", "utf8"));
