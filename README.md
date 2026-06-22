@@ -1,11 +1,13 @@
 # app-ollama-experiment
 
-Local AI experiment running two agents on top of a local [Ollama](https://ollama.ai/) model:
+Local AI experiment running several agents on top of a local [Ollama](https://ollama.ai/) model:
 
-- **Coding agent** (`aider`) — edits code in your local repos via [Aider](https://aider.chat/)
-- **Connected agent** (`agent`) — chat with a model that can reach out to the web when it needs to
+- **Coding agent** (`aider`) - edits code in your local repos via [Aider](https://aider.chat/)
+- **Coding agent** (`opencode`) - edits code in your local repos via [opencode](https://opencode.ai/)
+- **Connected agent** (`agent`) - chat with a model that can reach out to the web when it needs to
 
-By default runs `gemma4:e4b` (~9GB).
+By default runs `llama3.2:3b` (~2GB) - small and tool-calling capable, so every agent below works
+out of the box.
 
 ## Getting started
 
@@ -47,9 +49,21 @@ services:
 
 Then `drc up -d` to apply. The override file is gitignored by convention, so it stays local.
 
+## Coding agent (opencode)
+
+Like aider, but [opencode](https://opencode.ai/). The container idles; exec in:
+
+```
+drc exec opencode opencode                         # interactive
+drc exec opencode opencode run "explain this repo"  # one-shot
+```
+
+Configured by `OPENCODE_CONFIG_CONTENT` in `docker-compose.yml` (inline JSON, default `llama3.2:3b`).
+Editing works out of the box. Model and repo-mount details: [`config/opencode/README.md`](./config/opencode/README.md).
+
 ## Connected agent
 
-An interactive CLI to chat with the model. When it needs to, it'll reach out — search DuckDuckGo, read a URL, or call an API. You can ask it anything; it figures out whether it needs the internet or not.
+An interactive CLI to chat with the model. When it needs to, it'll reach out - search DuckDuckGo, read a URL, or call an API. You can ask it anything; it figures out whether it needs the internet or not.
 
 ```
 drc exec agent run
@@ -62,7 +76,7 @@ Type `exit` or `quit` to stop.
 To chat with the model directly via the Ollama CLI (no tools, no agent wrapper):
 
 ```
-drc exec ollama ollama run gemma4:e4b
+drc exec ollama ollama run llama3.2:3b
 ```
 
 Type `/bye` to exit.
@@ -78,11 +92,13 @@ Update the `MODEL` environment variable in `docker-compose.yml`:
       MODEL: "mistral"
 ```
 
-For the coding agent, also update `AIDER_MODEL` to match:
+For the aider coding agent, also update `AIDER_MODEL` to match:
 
 ```yaml
     environment:
       AIDER_MODEL: "ollama/mistral"
 ```
-
-Then `drc up -d` to apply.
+### Note about opencode
+To allow opencode top be agentic, the model must support tool-calling.
+Check for the `tools` tag on the model's page on the [Ollama library](https://ollama.ai/library).
+Also: `OLLAMA_CONTEXT_LENGTH: "32768"`, else it will choke.
