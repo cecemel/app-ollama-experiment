@@ -16,7 +16,7 @@
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
       "options": { "baseURL": "http://ollama:11434/v1" },
-      "models": { "llama3.2:3b": { "tools": true } }
+      "models": {}
     },
     "ollama-cloud": {
       "npm": "@ai-sdk/openai-compatible",

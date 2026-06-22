@@ -5,7 +5,6 @@ services:
     image: cecemel/app-ollama-experiment-ollama:0.0.1
     build: ./config/ollama/
     environment:
-      # If you switch this; change this in opencode config too.
       MODEL: "llama3.2:3b"
       # tool-calling needs > Ollama's 4096 default; lower to 16384 if RAM-tight
       OLLAMA_CONTEXT_LENGTH: "32768"
@@ -31,10 +30,17 @@ services:
     image: cecemel/app-ollama-experiment-opencode:0.0.1
     build: ./config/opencode/
     environment:
-      #OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT: "true"
+      OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT: "true"
+      # Log full chat input/output to `docker compose logs opencode`. Set "false" to disable.
+      OPENCODE_LOG_CHAT: "true"
+      OLLAMA_LOCAL_MODELS: |
+        {
+          "llama3.2:3b": { "tools": true }
+        }
       OLLAMA_CLOUD_MODELS: |
         {
           "qwen3-coder:480b": { "tools": true },
           "gpt-oss:120b": { "tools": true },
-          "glm-5.2": { "tools": true }
+          "glm-5.2": { "tools": true },
+          "qwen3.6:35b":  { "tools": true }
         }

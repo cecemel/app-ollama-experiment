@@ -22,6 +22,7 @@ ENV NODE_PATH=/usr/local/lib/node_modules
 # boot, splicing in the swappable OLLAMA_CLOUD_MODELS env var.
 COPY opencode.base.json /etc/opencode/opencode.base.json
 COPY start.sh /etc/opencode/start.sh
+COPY proxy.js /etc/opencode/proxy.js
 
 WORKDIR /workspace
 
