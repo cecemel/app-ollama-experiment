@@ -59,7 +59,43 @@ drc exec opencode opencode run "explain this repo"  # one-shot
 ```
 
 Configured by `OPENCODE_CONFIG_CONTENT` in `docker-compose.yml` (inline JSON, default `llama3.2:3b`).
-Editing works out of the box. Model and repo-mount details: [`config/opencode/README.md`](./config/opencode/README.md).
+
+### Extra nodes
+#### Running locally
+To allow opencode top be agentic, the model must support tool-calling.
+Check for the `tools` tag on the model's page on the [Ollama library](https://ollama.ai/library).
+Also: `OLLAMA_CONTEXT_LENGTH: "32768"`, else it will choke.
+#### Running with Ollama-cloud
+```
+  services:
+    opencode:
+      environment:
+        OLLAMA_API_KEY: "<insert your API key here>"
+        OPENCODE_CONFIG_CONTENT: |
+          {
+            "model": "ollama-cloud/qwen3-coder:480b",
+            "small_model": "ollama-cloud/gpt-oss:20b",
+            "provider": {
+              "ollama": {
+                "npm": "@ai-sdk/openai-compatible",
+                "options": { "baseURL": "http://ollama:11434/v1" },
+                "models": { "llama3.2:3b": { "tools": true } }
+              },
+              "ollama-cloud": {
+                "npm": "@ai-sdk/openai-compatible",
+                "options": { "baseURL": "https://ollama.com/v1", "apiKey": "{env:OLLAMA_API_KEY}" },
+                "models": {
+                  "qwen3-coder:480b": { "tools": true },
+                  "gpt-oss:120b": { "tools": true },
+                  "glm-5.2:cloud": { "tools": true }
+                }
+              }
+            }
+          }
+```
+
+
+####
 
 ## Connected agent
 
@@ -98,7 +134,32 @@ For the aider coding agent, also update `AIDER_MODEL` to match:
     environment:
       AIDER_MODEL: "ollama/mistral"
 ```
-### Note about opencode
-To allow opencode top be agentic, the model must support tool-calling.
-Check for the `tools` tag on the model's page on the [Ollama library](https://ollama.ai/library).
-Also: `OLLAMA_CONTEXT_LENGTH: "32768"`, else it will choke.
+
+## Sample docker-compose.override.yml configs
+```
+services:
+  ollama:
+    environment:
+      MODEL: "qwen3:8b"
+
+  opencode:
+    environment:
+      OPENCODE_CONFIG_CONTENT: |
+        {
+          "model": "ollama/qwen3:8b",
+          "small_model": "ollama/qwen3:8b",
+          "provider": {
+            "ollama": {
+              "npm": "@ai-sdk/openai-compatible",
+              "options": { "baseURL": "http://ollama:11434/v1" },
+              "models": { "qwen3:8b": { "tools": true } }
+            }
+          }
+        }
+    volumes:
+    - /path/to/your/repo:/workspace/repo
+
+  aider:
+    environment:
+      AIDER_MODEL: "ollama/qwen3:8b"
+```
