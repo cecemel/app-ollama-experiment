@@ -22,6 +22,17 @@
       "npm": "@ai-sdk/openai-compatible",
       "options": { "baseURL": "https://ollama.com/v1", "apiKey": "{env:OLLAMA_API_KEY}" },
       "models": {}
+    },
+    "weave": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": { "baseURL": "https://weave.redpencil.io/v1", "apiKey": "{env:WEAVE_API_KEY}" },
+      "models": {}
     }
+  },
+  "permission": {
+    "read": "allow",
+    "edit": { "/workspace/**": "allow", "*": "deny" },
+    "bash": "allow",
+    "external_directory": { "/workspace/**": "allow", "*": "deny" }
   }
 }
