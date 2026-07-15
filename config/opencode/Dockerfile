@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y xclip wl-clipboard && rm -rf /var/lib/a
 # opencode CLI + language servers for JS/TS and Python. LSP is off by default and
 # these are not auto-installed, so bake them in. (opencode pinned - see https://opencode.ai)
 RUN npm install -g \
-      opencode-ai@1.17.9 \
+      opencode-ai@1.18.1 \
       typescript \
       typescript-language-server \
       pyright
