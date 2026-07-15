@@ -21,37 +21,16 @@ It might take a while to fetch the model the first time. Check the ollama logs t
 drc logs -f ollama
 ```
 
-## Coding agent (aider)
-
-The aider container stays alive in the background. Exec into it to start an interactive session:
-
-```
-drc exec aider bash
-```
 
 Once inside, navigate to your project and start aider:
 
 ```
-cd /workspace/my-project
-aider
-```
-
-### Mounting your project
-
-Create a `docker-compose.override.yml` to mount the repo(s) you want aider to work on:
-
-```yaml
-services:
-  aider:
-    volumes:
-      - /path/to/your/repo:/workspace/repo
 ```
 
 Then `drc up -d` to apply. The override file is gitignored by convention, so it stays local.
 
 ## Coding agent (opencode)
 
-Like aider, but [opencode](https://opencode.ai/). The container idles; exec in:
 
 ```
 drc exec opencode opencode
@@ -105,9 +84,3 @@ Update the `MODEL` environment variable in `docker-compose.yml`:
       MODEL: "mistral"
 ```
 
-For the aider coding agent, also update `AIDER_MODEL` to match:
-
-```yaml
-    environment:
-      AIDER_MODEL: "ollama/mistral"
-```
