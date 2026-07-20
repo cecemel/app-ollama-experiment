@@ -45,3 +45,31 @@ services:
       # and the auto-installed provider package. config.json is regenerated each boot.
       - ./data/opencode/share:/root/.local/share/opencode
       - ./data/opencode/config:/root/.config/opencode
+
+  # Stripped-down opencode for small/local models: no LSP, formatter, MCP, plugins,
+  # instructions, skills, subagents, or per-model-family system prompts. Only read +
+  # edit + bash + glob + grep tools are exposed. Separate data dir so it doesn't
+  # collide with the full opencode service. Same model env knobs as `opencode`.
+  opencode-light:
+    image: cecemel/app-ollama-experiment-opencode-light:0.0.1
+    build: ./config/opencode-light/
+    environment:
+      OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT: "true"
+      # Log full chat input/output to `docker compose logs opencode-light`.
+      OPENCODE_LOG_CHAT: "true"
+      CHAT_LOG_MAXLEN: "0"
+      WEBFETCH_USER_AGENT: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0"
+      OLLAMA_LOCAL_MODELS: |
+        {
+          "llama3.2:3b": { "tools": true }
+        }
+      OLLAMA_CLOUD_MODELS: |
+        {
+          "qwen3-coder:480b": { "tools": true },
+          "gpt-oss:120b": { "tools": true },
+          "glm-5.2": { "tools": true },
+          "qwen3.6:35b":  { "tools": true }
+        }
+    volumes:
+      - ./data/opencode-light/share:/root/.local/share/opencode
+      - ./data/opencode-light/config:/root/.config/opencode
