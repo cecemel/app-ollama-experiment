@@ -31,7 +31,7 @@
   },
   "permission": {
     "read": "allow",
-    "edit": { "/workspace/**": "allow", "*": "deny" },
+    "edit": { "/workspace/**": "allow" },
     "bash": "allow",
     "external_directory": { "/workspace/**": "allow", "*": "deny" }
   }
