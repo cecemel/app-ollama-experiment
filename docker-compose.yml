@@ -6,7 +6,6 @@ services:
     build: ./config/ollama/
     environment:
       MODEL: "llama3.2:3b"
-      # tool-calling needs > Ollama's 4096 default; lower to 16384 if RAM-tight
       OLLAMA_CONTEXT_LENGTH: "32768"
     volumes:
       - ./data:/root/.ollama
@@ -24,38 +23,6 @@ services:
     build: ./config/opencode/
     environment:
       OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT: "true"
-      # Log full chat input/output to `docker compose logs opencode`. Set "false" to disable.
-      OPENCODE_LOG_CHAT: "true"
-      CHAT_LOG_MAXLEN: "0" # unlimited chat logs in docker compose
-      # User-Agent for opencode's webfetch tool (overridden by a custom tool to look like Firefox)
-      WEBFETCH_USER_AGENT: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0"
-      OLLAMA_LOCAL_MODELS: |
-        {
-          "llama3.2:3b": { "tools": true }
-        }
-      OLLAMA_CLOUD_MODELS: |
-        {
-          "qwen3-coder:480b": { "tools": true },
-          "gpt-oss:120b": { "tools": true },
-          "glm-5.2": { "tools": true },
-          "qwen3.6:35b":  { "tools": true }
-        }
-    volumes:
-      # persist opencode state across restarts: sessions/history + auth (the db),
-      # and the auto-installed provider package. config.json is regenerated each boot.
-      - ./data/opencode/share:/root/.local/share/opencode
-      - ./data/opencode/config:/root/.config/opencode
-
-  # Stripped-down opencode for small/local models: no LSP, formatter, MCP, plugins,
-  # instructions, skills, subagents, or per-model-family system prompts. Only read +
-  # edit + bash + glob + grep tools are exposed. Separate data dir so it doesn't
-  # collide with the full opencode service. Same model env knobs as `opencode`.
-  opencode-light:
-    image: cecemel/app-ollama-experiment-opencode-light:0.0.1
-    build: ./config/opencode-light/
-    environment:
-      OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT: "true"
-      # Log full chat input/output to `docker compose logs opencode-light`.
       OPENCODE_LOG_CHAT: "true"
       CHAT_LOG_MAXLEN: "0"
       WEBFETCH_USER_AGENT: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0"
@@ -70,6 +37,51 @@ services:
           "glm-5.2": { "tools": true },
           "qwen3.6:35b":  { "tools": true }
         }
+      HF_MODELS: |
+        {
+          "bonsai-27b-1bit": { "tools": true }
+        }
+    volumes:
+      - ./data/opencode/share:/root/.local/share/opencode
+      - ./data/opencode/config:/root/.config/opencode
+
+  opencode-light:
+    image: cecemel/app-ollama-experiment-opencode-light:0.0.1
+    build: ./config/opencode-light/
+    environment:
+      OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT: "true"
+      OPENCODE_LOG_CHAT: "true"
+      CHAT_LOG_MAXLEN: "0"
+      WEBFETCH_USER_AGENT: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0"
+      OLLAMA_LOCAL_MODELS: |
+        {
+          "llama3.2:3b": { "tools": true }
+        }
+      OLLAMA_CLOUD_MODELS: |
+        {
+          "qwen3-coder:480b": { "tools": true },
+          "gpt-oss:120b": { "tools": true },
+          "glm-5.2": { "tools": true },
+          "qwen3.6:35b":  { "tools": true }
+        }
+      HF_MODELS: |
+        {
+          "bonsai-27b-1bit": { "tools": true }
+        }
     volumes:
       - ./data/opencode-light/share:/root/.local/share/opencode
       - ./data/opencode-light/config:/root/.config/opencode
+  huggingface-local:
+    image: cecemel/app-ollama-experiment-huggingface-local:0.0.1
+    build:
+      context: ./config/huggingface-local/
+      args:
+        BACKEND: "cpu"
+        RELEASE_TAG: "prism-b9596-9fcaed7"
+    environment:
+      HF_MODEL: "prism-ml/Bonsai-27B-gguf:Q1_0"
+      LLAMA_NGL: "99"
+      LLAMA_CONTEXT: "32768"
+      LLAMA_ALIAS: "bonsai-27b-1bit"
+    volumes:
+      - ./data/huggingface-local:/data

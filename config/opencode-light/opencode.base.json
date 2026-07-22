@@ -1,0 +1,101 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "ollama/llama3.2:3b",
+  "small_model": "ollama/llama3.2:3b",
+  "instructions": [],
+  "lsp": {
+    "typescript": {
+      "command": ["typescript-language-server", "--stdio"],
+      "extensions": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".mts", ".cts"]
+    },
+    "pyright": {
+      "command": ["pyright-langserver", "--stdio"],
+      "extensions": [".py", ".pyi"]
+    }
+  },
+  "formatter": false,
+  "mcp": {},
+  "plugin": [],
+  "snapshot": false,
+  "autoupdate": false,
+  "share": "disabled",
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "reserved": 4096
+  },
+  "permission": {
+    "read": "allow",
+    "edit": {
+      "/workspace/**": "allow"
+    },
+    "bash": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "external_directory": {
+      "/workspace/**": "allow",
+      "*": "deny"
+    },
+    "task": "deny",
+    "todowrite": "deny",
+    "skill": "deny",
+    "question": "deny"
+  },
+  "agent": {
+    "build": {
+      "prompt": "You are a coding agent. Use the tools to help with the user's request. Be concise."
+    },
+    "plan": {
+      "prompt": "You are a planning agent. Read code and propose changes. Do not edit. Be concise."
+    },
+    "general": {
+      "disable": true
+    },
+    "explore": {
+      "disable": true
+    },
+    "scout": {
+      "disable": true
+    },
+    "compaction": {
+      "prompt": "Summarize the conversation so far, preserving tool calls and results. Be concise."
+    },
+    "title": {
+      "prompt": "Return a 2-5 word title for this conversation. No punctuation."
+    },
+    "summary": {
+      "disable": true
+    }
+  },
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://ollama:11434/v1"
+      },
+      "models": {}
+    },
+    "ollama-cloud": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "https://ollama.com/v1",
+        "apiKey": "{env:OLLAMA_API_KEY}"
+      },
+      "models": {}
+    },
+    "weave": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "https://weave.redpencil.io/v1",
+        "apiKey": "{env:WEAVE_API_KEY}"
+      },
+      "models": {}
+    },
+    "huggingface-local": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": { "baseURL": "http://huggingface-local:8080/v1" },
+      "models": {}
+    }
+  }
+}

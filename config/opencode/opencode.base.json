@@ -27,6 +27,11 @@
       "npm": "@ai-sdk/openai-compatible",
       "options": { "baseURL": "https://weave.redpencil.io/v1", "apiKey": "{env:WEAVE_API_KEY}" },
       "models": {}
+    },
+    "huggingface-local": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": { "baseURL": "http://huggingface-local:8080/v1" },
+      "models": {}
     }
   },
   "permission": {
