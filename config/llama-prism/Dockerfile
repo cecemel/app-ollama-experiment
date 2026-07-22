@@ -1,4 +1,4 @@
-# HuggingFace local runtime - llama.cpp (PrismML fork).
+# llama-prism - llama.cpp (PrismML fork).
 #
 # Runs the Ternary-Bonsai / Bonsai 2-bit ("Q2_0_g128") GGUF models from HF. These
 # GGUFs need PrismML's fork of llama.cpp - mainline llama.cpp cannot load the
@@ -7,7 +7,7 @@
 # The image pulls a prebuilt llama-server binary from the fork's GitHub release
 # (no source build), then runs start.sh which downloads the model from HF on
 # first boot and serves an OpenAI-compatible /v1 endpoint on port 8080. opencode
-# picks it up via the "huggingface-local" provider (opencode.base.json).
+# picks it up via the "llama-prism" provider (opencode.base.json).
 #
 # Pick a backend at build time:
 #   --build-arg BACKEND=cpu        Linux x86-64, CPU only (default; smallest, no GPU deps)
@@ -52,7 +52,7 @@ RUN case "$BACKEND" in \
     BIN=$(find /opt/llama -type f -name llama-server -print -quit) && \
     test -n "$BIN" && ln -sf "$BIN" /usr/local/bin/llama-server
 
-# HF_HOME so downloaded GGUFs cache under /data (mounted to ./data/huggingface-local)
+# HF_HOME so downloaded GGUFs cache under /data (mounted to ./data/llama-prism)
 # and survive container rebuilds.
 ENV HF_HOME=/data \
     HUGGINGFACE_HUB_CACHE=/data/hub \

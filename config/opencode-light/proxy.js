@@ -1,8 +1,8 @@
 "use strict";
 // Logging proxy: opencode -> here -> Ollama (local, cloud, weave) or the
-// PrismML llama.cpp server (hf). Logs the full chat request (messages + tools)
+// PrismML llama.cpp server (prism). Logs the full chat request (messages + tools)
 // and response (assistant text + tool calls) to stdout, so it shows up in
-// `docker compose logs opencode`. Routes by /local, /cloud, /weave or /hf prefix.
+// `docker compose logs opencode`. Routes by /local, /cloud, /weave or /prism prefix.
 // The auth header is forwarded but never logged.
 const http = require("http");
 const https = require("https");
@@ -11,10 +11,10 @@ const { URL } = require("url");
 const PORT = parseInt(process.env.CHAT_LOG_PORT || "8787", 10);
 const MAXLEN = parseInt(process.env.CHAT_LOG_MAXLEN || "6000", 10); // per field; 0 = unlimited
 const UPSTREAMS = {
-  local: process.env.UPSTREAM_LOCAL || "http://ollama:11434",
+  local: process.env.UPSTREAM_LOCAL || "http://ollama-local:11434",
   cloud: process.env.UPSTREAM_CLOUD || "https://ollama.com",
   weave: process.env.UPSTREAM_WEAVE || "https://weave.redpencil.io",
-  hf:    process.env.UPSTREAM_HF    || "http://huggingface-local:8080",
+  prism: process.env.UPSTREAM_PRISM || "http://llama-prism:8080",
 };
 
 const ts = () => new Date().toISOString();
@@ -69,8 +69,8 @@ function logResp(key, status, headers, body) {
 }
 
 const server = http.createServer((req, res) => {
-  const match = req.url.match(/^\/(local|cloud|weave|hf)(\/.*)?$/);
-  if (!match) { res.writeHead(404); res.end("route must start with /local, /cloud, /weave or /hf"); return; }
+  const match = req.url.match(/^\/(local|cloud|weave|prism)(\/.*)?$/);
+  if (!match) { res.writeHead(404); res.end("route must start with /local, /cloud, /weave or /prism"); return; }
   const key = match[1];
   const path = match[2] || "/";
   const up = new URL(UPSTREAMS[key]);
@@ -103,4 +103,4 @@ const server = http.createServer((req, res) => {
 });
 
 process.on("uncaughtException", (e) => console.error("[chat-log] uncaught:", e.message));
-server.listen(PORT, "0.0.0.0", () => console.log(`[chat-log] proxy on :${PORT} (local -> ${UPSTREAMS.local}, cloud -> ${UPSTREAMS.cloud}, weave -> ${UPSTREAMS.weave}, hf -> ${UPSTREAMS.hf}) maxlen=${MAXLEN}`));
+server.listen(PORT, "0.0.0.0", () => console.log(`[chat-log] proxy on :${PORT} (local -> ${UPSTREAMS.local}, cloud -> ${UPSTREAMS.cloud}, weave -> ${UPSTREAMS.weave}, prism -> ${UPSTREAMS.prism}) maxlen=${MAXLEN}`));

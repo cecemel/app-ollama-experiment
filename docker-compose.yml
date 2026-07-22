@@ -1,8 +1,8 @@
 version: '3.7'
 
 services:
-  ollama:
-    image: cecemel/app-ollama-experiment-ollama:0.0.1
+  ollama-local:
+    image: cecemel/app-ollama-experiment-ollama-local:0.0.1
     build: ./config/ollama/
     environment:
       MODEL: "llama3.2:3b"
@@ -13,7 +13,7 @@ services:
     image: cecemel/app-ollama-experiment-agent:0.0.1
     build: ./config/agent/
     environment:
-      OLLAMA_HOST: "http://ollama:11434"
+      OLLAMA_HOST: "http://ollama-local:11434"
       MODEL: "llama3.2:3b"
     volumes:
       - ./config/agent/agent.py:/app/agent.py
@@ -37,7 +37,7 @@ services:
           "glm-5.2": { "tools": true },
           "qwen3.6:35b":  { "tools": true }
         }
-      HF_MODELS: |
+      PRISM_MODELS: |
         {
           "bonsai-27b-1bit": { "tools": true }
         }
@@ -64,24 +64,24 @@ services:
           "glm-5.2": { "tools": true },
           "qwen3.6:35b":  { "tools": true }
         }
-      HF_MODELS: |
+      PRISM_MODELS: |
         {
           "bonsai-27b-1bit": { "tools": true }
         }
     volumes:
       - ./data/opencode-light/share:/root/.local/share/opencode
       - ./data/opencode-light/config:/root/.config/opencode
-  huggingface-local:
-    image: cecemel/app-ollama-experiment-huggingface-local:0.0.1
+  llama-prism:
+    image: cecemel/app-ollama-experiment-llama-prism:0.0.1
     build:
-      context: ./config/huggingface-local/
+      context: ./config/llama-prism/
       args:
         BACKEND: "cpu"
         RELEASE_TAG: "prism-b9596-9fcaed7"
     environment:
-      HF_MODEL: "prism-ml/Bonsai-27B-gguf:Q1_0"
+      PRISM_MODEL: "prism-ml/Bonsai-27B-gguf:Q1_0"
       LLAMA_NGL: "99"
       LLAMA_CONTEXT: "32768"
       LLAMA_ALIAS: "bonsai-27b-1bit"
     volumes:
-      - ./data/huggingface-local:/data
+      - ./data/llama-prism:/data
