@@ -92,6 +92,43 @@ Options: `cpu`, `cuda-12.8`, `cuda-12.4`, `vulkan`, `rocm-7.2`. See `config/llam
 
 GPU backends need device passthrough at runtime - see `docker-compose.override.yml`.
 
+### NVIDIA GPU via CUDA
+
+Use `BACKEND=cuda-12.8` (or `cuda-12.4`). The CUDA build starts from the matching
+`nvidia/cuda` runtime image so the prebuilt `llama-server` can find `libcublas.so.12`
+and friends at startup.
+
+**Host requirements (one-time):**
+- NVIDIA driver: >= 550.x for CUDA 12.4, >= 570.x for CUDA 12.8 (`nvidia-smi` shows
+  the max CUDA version your driver supports)
+- `nvidia-container-toolkit` installed - without it Docker can't pass the GPU +
+  driver libs into the container
+
+In `docker-compose.override.yml`:
+
+```yaml
+services:
+  llama-prism:
+    build:
+      args:
+        BACKEND: "cuda-12.8"      # or cuda-12.4
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      LLAMA_NGL: "99"
+```
+
+```
+drc build llama-prism
+drc up -d llama-prism
+drc exec llama-prism nvidia-smi
+```
+
 ### AMD iGPU (Phoenix3 / Radeon 780M) via Vulkan
 
 Use `BACKEND=vulkan` (ROCm doesn't target iGPUs). In `docker-compose.override.yml`:

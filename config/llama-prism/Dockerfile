@@ -24,11 +24,23 @@
 ARG BACKEND=cpu
 ARG RELEASE_TAG=prism-b9596-9fcaed7
 
-FROM ubuntu:24.04 AS base
+# The prebuilt CUDA llama-server binary links against the CUDA userspace libs
+# (libcublas.so.12, libcudart.so.12, ...), so cuda-* builds must start from the
+# matching nvidia/cuda runtime image - plain ubuntu leaves the binary unable to
+# find libcublas.so.12 at startup (exit 127). cpu/vulkan/rocm stay on ubuntu.
+# 12.4 has no ubuntu24.04 runtime tag (predates 24.04 GA), so it uses 22.04.
+FROM ubuntu:24.04 AS base-cpu
+FROM ubuntu:24.04 AS base-vulkan
+FROM ubuntu:24.04 AS base-rocm-7.2
+FROM nvidia/cuda:12.8.2-runtime-ubuntu24.04 AS base-cuda-12.8
+FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04 AS base-cuda-12.4
+
+FROM base-${BACKEND} AS base
 ARG RELEASE_TAG
 ARG BACKEND
 # Vulkan needs the loader + Mesa's RADV userspace driver to talk to the AMD iGPU.
 # The prebuilt binary links against libvulkan; CPU builds only need libgomp1.
+# CUDA userspace libs come from the nvidia/cuda base image selected above.
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl tar libgomp1 \
       $(case "$BACKEND" in vulkan) echo "libvulkan1 mesa-vulkan-drivers vulkan-tools";; esac) \

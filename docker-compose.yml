@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   ollama-local:
     image: cecemel/app-ollama-experiment-ollama-local:0.0.1
