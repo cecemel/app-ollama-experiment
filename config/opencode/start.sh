@@ -28,6 +28,7 @@ apply("OLLAMA_LOCAL_MODELS", "ollama-local");
 apply("OLLAMA_CLOUD_MODELS", "ollama-cloud");
 apply("WEAVE_MODELS", "weave");
 apply("PRISM_MODELS", "llama-prism");
+apply("LOCALHOST_GATEWAY_MODELS", "localhost-gateway");
 if (process.env.OPENCODE_MODEL) cfg.model = process.env.OPENCODE_MODEL.trim();
 if (process.env.OPENCODE_SMALL_MODEL) cfg.small_model = process.env.OPENCODE_SMALL_MODEL.trim();
 // When chat logging is on, route the providers through the local logging proxy.
@@ -37,10 +38,11 @@ if (process.env.OPENCODE_LOG_CHAT === "true") {
   cfg.provider["ollama-cloud"].options.baseURL = "http://localhost:" + port + "/cloud/v1";
   cfg.provider.weave.options.baseURL = "http://localhost:" + port + "/weave/v1";
   cfg.provider["llama-prism"].options.baseURL = "http://localhost:" + port + "/prism/v1";
+  cfg.provider["localhost-gateway"].options.baseURL = "http://localhost:" + port + "/gateway/v1";
 }
 fs.writeFileSync("/root/.config/opencode/opencode.json", JSON.stringify(cfg, null, 2));
 const k = p => Object.keys(cfg.provider[p].models).join(", ") || "(none)";
-console.log("opencode config ready; model: " + cfg.model + " | local: " + k("ollama-local") + " | cloud: " + k("ollama-cloud") + " | weave: " + k("weave") + " | prism: " + k("llama-prism") + (process.env.OPENCODE_LOG_CHAT === "true" ? " | chat-logging: ON" : ""));
+console.log("opencode config ready; model: " + cfg.model + " | local: " + k("ollama-local") + " | cloud: " + k("ollama-cloud") + " | weave: " + k("weave") + " | prism: " + k("llama-prism") + " | gateway: " + k("localhost-gateway") + (process.env.OPENCODE_LOG_CHAT === "true" ? " | chat-logging: ON" : ""));
 '
 
 # With chat logging on, the proxy is the main process (logs traffic to docker logs and

@@ -19,6 +19,11 @@ services:
   opencode:
     image: cecemel/app-ollama-experiment-opencode:0.0.1
     build: ./config/opencode/
+    # "host" -> host-gateway so the "localhost-gateway" provider can reach
+    # services bound on the host's localhost (port baked into the image at
+    # config/opencode/opencode.base.json). Register models in docker-compose.override.yml.
+    extra_hosts:
+      - "host:host-gateway"
     environment:
       OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT: "true"
       OPENCODE_LOG_CHAT: "true"
@@ -46,6 +51,11 @@ services:
   opencode-light:
     image: cecemel/app-ollama-experiment-opencode-light:0.0.1
     build: ./config/opencode-light/
+    # "host" -> host-gateway so the "localhost-gateway" provider can reach
+    # services bound on the host's localhost (port baked into the image at
+    # config/opencode-light/opencode.base.json). Register models in docker-compose.override.yml.
+    extra_hosts:
+      - "host:host-gateway"
     environment:
       OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT: "true"
       OPENCODE_LOG_CHAT: "true"

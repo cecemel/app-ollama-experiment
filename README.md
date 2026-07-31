@@ -46,6 +46,44 @@ drc exec opencode-light opencode
 
 Trimmed for small/local models. Same env knobs as `opencode`. See `config/opencode-light/` for what's stripped.
 
+## Host localhost gateway (localhost-gateway provider)
+
+`opencode` and `opencode-light` ship a `localhost-gateway` provider that reaches
+services running on the **host's** localhost from inside the container. It uses
+`host` (mapped to `host-gateway` via `extra_hosts` in `docker-compose.yml`), so it
+works on Linux + Docker Desktop with no host-side setup. The base URL/port is baked
+into the image at `config/opencode*/opencode.base.json` (default `http://host:8892/v1`) -
+change it there and rebuild if you need a different port.
+
+Register the host-side models in `docker-compose.override.yml`:
+
+```yaml
+services:
+  opencode:
+    environment:
+      LOCALHOST_GATEWAY_MODELS: |
+        {
+          "my-local-model": { "tools": true }
+        }
+  opencode-light:
+    environment:
+      LOCALHOST_GATEWAY_MODELS: |
+        {
+          "my-local-model": { "tools": true }
+        }
+```
+
+Then use it like any other provider:
+
+```
+drc exec opencode opencode run --model localhost-gateway/my-local-model "..."
+```
+
+The host service must bind on `0.0.0.0` (or `host`), not just `127.0.0.1` - Docker
+reaches it via the host's bridge gateway IP, which a loopback-only bind won't
+accept. The chat-log proxy (when `OPENCODE_LOG_CHAT=true`) routes this provider
+under the `/gateway` prefix.
+
 ## Connected agent
 
 ```

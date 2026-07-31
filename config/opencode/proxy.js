@@ -15,6 +15,7 @@ const UPSTREAMS = {
   cloud: process.env.UPSTREAM_CLOUD || "https://ollama.com",
   weave: process.env.UPSTREAM_WEAVE || "https://weave.redpencil.io",
   prism: process.env.UPSTREAM_PRISM || "http://llama-prism:8080",
+  gateway: process.env.UPSTREAM_GATEWAY || "http://host:8892",
 };
 
 const ts = () => new Date().toISOString();
@@ -69,8 +70,8 @@ function logResp(key, status, headers, body) {
 }
 
 const server = http.createServer((req, res) => {
-  const match = req.url.match(/^\/(local|cloud|weave|prism)(\/.*)?$/);
-  if (!match) { res.writeHead(404); res.end("route must start with /local, /cloud, /weave or /prism"); return; }
+  const match = req.url.match(/^\/(local|cloud|weave|prism|gateway)(\/.*)?$/);
+  if (!match) { res.writeHead(404); res.end("route must start with /local, /cloud, /weave, /prism or /gateway"); return; }
   const key = match[1];
   const path = match[2] || "/";
   const up = new URL(UPSTREAMS[key]);
@@ -103,4 +104,4 @@ const server = http.createServer((req, res) => {
 });
 
 process.on("uncaughtException", (e) => console.error("[chat-log] uncaught:", e.message));
-server.listen(PORT, "0.0.0.0", () => console.log(`[chat-log] proxy on :${PORT} (local -> ${UPSTREAMS.local}, cloud -> ${UPSTREAMS.cloud}, weave -> ${UPSTREAMS.weave}, prism -> ${UPSTREAMS.prism}) maxlen=${MAXLEN}`));
+server.listen(PORT, "0.0.0.0", () => console.log(`[chat-log] proxy on :${PORT} (local -> ${UPSTREAMS.local}, cloud -> ${UPSTREAMS.cloud}, weave -> ${UPSTREAMS.weave}, prism -> ${UPSTREAMS.prism}, gateway -> ${UPSTREAMS.gateway}) maxlen=${MAXLEN}`));

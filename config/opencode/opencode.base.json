@@ -32,6 +32,11 @@
       "npm": "@ai-sdk/openai-compatible",
       "options": { "baseURL": "http://llama-prism:8080/v1" },
       "models": {}
+    },
+    "localhost-gateway": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": { "baseURL": "http://host:8892/v1" },
+      "models": {}
     }
   },
   "permission": {
