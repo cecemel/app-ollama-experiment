@@ -1,3 +1,6 @@
 data/*
 !data/.gitkeep
 docker-compose.override.yml
+# Local-only agent instructions (mounted via docker-compose.override.yml, not baked into the image)
+config/opencode/AGENTS.md
+config/opencode-light/AGENTS.md

@@ -21,7 +21,6 @@ ENV NODE_PATH=/usr/local/lib/node_modules
 # Fixed config (providers + lsp) is baked in; start.sh assembles the live config at
 # boot, splicing in the swappable OLLAMA_CLOUD_MODELS env var.
 COPY opencode.base.json /etc/opencode/opencode.base.json
-COPY AGENTS.md /etc/opencode/AGENTS.md
 COPY start.sh /etc/opencode/start.sh
 COPY proxy.js /etc/opencode/proxy.js
 COPY webfetch.ts /etc/opencode/webfetch.ts
