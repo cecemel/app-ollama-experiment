@@ -45,7 +45,8 @@ services:
           "bonsai-27b-1bit": { "tools": true }
         }
     volumes:
-      - ./data/opencode/share:/root/.local/share/opencode
+      # TODO: check if we have less bias in the conversations accross sessions
+      #- ./data/opencode-light/share:/root/.local/share/opencode
       - ./data/opencode/config:/root/.config/opencode
 
   opencode-light:
@@ -77,7 +78,8 @@ services:
           "bonsai-27b-1bit": { "tools": true }
         }
     volumes:
-      - ./data/opencode-light/share:/root/.local/share/opencode
+      # TODO: check if we have less bias in the conversations accross sessions
+      #- ./data/opencode-light/share:/root/.local/share/opencode
       - ./data/opencode-light/config:/root/.config/opencode
   llama-prism:
     image: cecemel/app-ollama-experiment-llama-prism:0.0.1
