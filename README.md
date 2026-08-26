@@ -1,6 +1,6 @@
 # app-ollama-experiment
 
-Local AI agents. Default model `llama3.2:3b` (tool-calling capable).
+Local AI agents. Default model `ollama-cloud/glm-5.2` (tool-calling capable). `small_model` stays on `ollama-local/llama3.2:3b` for titles/summaries.
 
 - `opencode` - coding agent ([opencode](https://opencode.ai/))
 - `opencode-light` - stripped opencode for small/local models. See `config/opencode-light/`
@@ -37,6 +37,19 @@ drc exec opencode opencode run --model ollama-local/llama3.2:3b "..."
 drc exec opencode opencode run --model ollama-cloud/qwen3-coder:480b "..."
 drc exec opencode opencode run --model llama-prism/bonsai-27b-1bit "..."
 ```
+
+### Agent instructions (AGENTS.md)
+
+The gitignored `./config/opencode/AGENTS.md` is mounted read-only into the container at `/etc/opencode/AGENTS.md` from `docker-compose.override.yml` (this repo is public; personal rules don't ship in the image):
+
+```yaml
+services:
+  opencode:
+    volumes:
+      - ./config/opencode/AGENTS.md:/etc/opencode/AGENTS.md:ro
+```
+
+At boot `start.sh` copies it to `/root/.config/opencode/AGENTS.md`, which opencode auto-discovers as global rules and applies to every session. Missing or empty source warns (but never crashes). Restart opencode to reload after edits.
 
 ## Coding agent (opencode-light)
 

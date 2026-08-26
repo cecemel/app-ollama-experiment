@@ -10,6 +10,16 @@ mkdir -p /root/.config/opencode
 # config volume, so we drop it in at boot rather than baking it into the image path.
 mkdir -p /root/.config/opencode/tools
 cp /etc/opencode/webfetch.ts /root/.config/opencode/tools/webfetch.ts
+# Personal global rules: opencode auto-discovers ~/.config/opencode/AGENTS.md and
+# applies it to every session. The source is bind-mounted (gitignored) from
+# docker-compose.override.yml; copy it in at boot so the rules load via the
+# global mechanism rather than the instructions array (more robust across
+# sessions, no path dependency). Warn if the source is missing or empty.
+if [ -s /etc/opencode/AGENTS.md ]; then
+  cp /etc/opencode/AGENTS.md /root/.config/opencode/AGENTS.md
+else
+  echo "WARNING: /etc/opencode/AGENTS.md is missing or empty - personal rules won't load."
+fi
 node -e '
 const fs = require("fs");
 const cfg = JSON.parse(fs.readFileSync("/etc/opencode/opencode.base.json", "utf8"));
@@ -31,6 +41,14 @@ apply("PRISM_MODELS", "llama-prism");
 apply("LOCALHOST_GATEWAY_MODELS", "localhost-gateway");
 if (process.env.OPENCODE_MODEL) cfg.model = process.env.OPENCODE_MODEL.trim();
 if (process.env.OPENCODE_SMALL_MODEL) cfg.small_model = process.env.OPENCODE_SMALL_MODEL.trim();
+// Keep the build agent default model in sync with OPENCODE_MODEL. The "max"
+// variant is GLM-5.2-only; drop it when overridden to a different model (most
+// providers do not have a "max" variant and would error).
+if (cfg.agent && cfg.agent.build) {
+  const m = process.env.OPENCODE_MODEL ? process.env.OPENCODE_MODEL.trim() : "ollama-cloud/glm-5.2";
+  cfg.agent.build.model = m;
+  cfg.agent.build.variant = /\/glm-5\.2($|@)/.test(m) ? "max" : undefined;
+}
 // When chat logging is on, route the providers through the local logging proxy.
 if (process.env.OPENCODE_LOG_CHAT === "true") {
   const port = process.env.CHAT_LOG_PORT || "8787";
