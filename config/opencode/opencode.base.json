@@ -45,6 +45,9 @@
       "models": {}
     }
   },
+  "plugin": [
+    "opencode-search@0.0.9"
+  ],
   "permission": {
     "read": "allow",
     "edit": { "/workspace/**": "allow" },
