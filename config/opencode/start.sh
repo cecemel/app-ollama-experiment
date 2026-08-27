@@ -10,6 +10,10 @@ mkdir -p /root/.config/opencode
 # config volume, so we drop it in at boot rather than baking it into the image path.
 mkdir -p /root/.config/opencode/tools
 cp /etc/opencode/webfetch.ts /root/.config/opencode/tools/webfetch.ts
+# LOV SPARQL tool: searches the Linked Open Vocabularies registry for RDF
+# vocabularies. Self-contained (uses only global fetch); does not need
+# websearch or the opencode-search plugin to be configured.
+cp /etc/opencode/lov-sparql.ts /root/.config/opencode/tools/lov-sparql.ts
 # Personal global rules: opencode auto-discovers ~/.config/opencode/AGENTS.md and
 # applies it to every session. The source is bind-mounted (gitignored) from
 # docker-compose.override.yml; copy it in at boot so the rules load via the

@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y xclip wl-clipboard && rm -rf /var/lib/a
 # opencode CLI + language servers for JS/TS and Python. LSP is off by default and
 # these are not auto-installed, so bake them in. (opencode pinned - see https://opencode.ai)
 RUN npm install -g \
-      opencode-ai@1.18.10 \
+      opencode-ai@1.18.23 \
       typescript \
       typescript-language-server \
       pyright
@@ -24,6 +24,7 @@ COPY opencode.base.json /etc/opencode/opencode.base.json
 COPY start.sh /etc/opencode/start.sh
 COPY proxy.js /etc/opencode/proxy.js
 COPY webfetch.ts /etc/opencode/webfetch.ts
+COPY lov-sparql.ts /etc/opencode/lov-sparql.ts
 
 WORKDIR /workspace
 

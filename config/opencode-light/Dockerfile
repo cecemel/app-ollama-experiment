@@ -29,6 +29,7 @@ COPY opencode.base.json /etc/opencode/opencode.base.json
 COPY start.sh /etc/opencode/start.sh
 COPY proxy.js /etc/opencode/proxy.js
 COPY webfetch.ts /etc/opencode/webfetch.ts
+COPY lov-sparql.ts /etc/opencode/lov-sparql.ts
 
 WORKDIR /workspace
 

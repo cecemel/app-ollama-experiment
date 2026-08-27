@@ -12,6 +12,10 @@ mkdir -p /root/.config/opencode
 # set OPENCODE_LIGHT_WEBFETCH=deny in docker-compose.yml to turn them off.
 mkdir -p /root/.config/opencode/tools
 cp /etc/opencode/webfetch.ts /root/.config/opencode/tools/webfetch.ts
+# LOV SPARQL tool: searches the Linked Open Vocabularies registry for RDF
+# vocabularies. Self-contained (uses only global fetch); does not need
+# websearch or the opencode-search plugin to be configured.
+cp /etc/opencode/lov-sparql.ts /root/.config/opencode/tools/lov-sparql.ts
 node -e '
 const fs = require("fs");
 const cfg = JSON.parse(fs.readFileSync("/etc/opencode/opencode.base.json", "utf8"));

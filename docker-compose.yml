@@ -38,7 +38,15 @@ services:
           "qwen3-coder:480b": { "tools": true },
           "gpt-oss:120b": { "tools": true },
           "glm-5.2": { "tools": true },
-          "qwen3.6:35b":  { "tools": true }
+          "qwen3.6:35b":  { "tools": true },
+          "glm-5.3-flash:cloud": {
+            "tools": true,
+            "reasoning": true,
+            "variants": {
+              "max":  { "reasoningEffort": "max" },
+              "high": { "reasoningEffort": "high" }
+            }
+          }
         }
       PRISM_MODELS: |
         {
@@ -71,7 +79,15 @@ services:
           "qwen3-coder:480b": { "tools": true },
           "gpt-oss:120b": { "tools": true },
           "glm-5.2": { "tools": true },
-          "qwen3.6:35b":  { "tools": true }
+          "qwen3.6:35b":  { "tools": true },
+          "glm-5.3-flash:cloud": {
+            "tools": true,
+            "reasoning": true,
+            "variants": {
+              "max":  { "reasoningEffort": "max" },
+              "high": { "reasoningEffort": "high" }
+            }
+          }
         }
       PRISM_MODELS: |
         {

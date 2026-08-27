@@ -105,6 +105,24 @@ drc exec agent run
 
 Type `exit` or `quit` to stop.
 
+## LOV vocabulary search (built-in tool)
+
+`opencode` and `opencode-light` ship a `lov-sparql` custom tool. When the user
+asks for RDF vocabularies / ontologies / schemas, the agent calls it **in
+addition to** any web search. It queries the [LOV](https://lov.linkeddata.es/)
+(Liked Open Vocabularies) SPARQL endpoint and returns matching vocabularies
+(URI, prefix, title, description).
+
+The tool is self-contained - it uses only the built-in `fetch`, so it ships
+to other Ollama instances without assuming `websearch` or the `opencode-search`
+plugin is configured. It lives at `config/opencode*/lov-sparql.ts` and is
+copied into `~/.config/opencode/tools/` at boot (same pattern as `webfetch.ts`).
+
+Knobs (env, all optional):
+
+- `LOV_SPARQL_ENDPOINT` - override the endpoint URL (default `https://lov.linkeddata.es/dataset/sparql`)
+- `LOV_SPARQL_TIMEOUT` - query timeout in seconds (default `30`, max `120`)
+
 ## llama-prism
 
 `llama-prism` runs [PrismML's llama.cpp fork](https://github.com/PrismML-Eng/llama.cpp) and serves an OpenAI-compatible `/v1` endpoint on port 8080. Downloads the GGUF on first boot (cached under `./data/llama-prism/`). See `config/llama-prism/start.sh` for all env knobs.
