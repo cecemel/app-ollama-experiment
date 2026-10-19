@@ -22,6 +22,7 @@ services:
     # "host" -> host-gateway so the "localhost-gateway" provider can reach
     # services bound on the host's localhost (port baked into the image at
     # config/opencode/opencode.base.json). Register models in docker-compose.override.yml.
+    # Note if you want ssh-tunnels to work, you need to update the config of the tunnel that it accepts connections from outside 127.0.0.0
     extra_hosts:
       - "host:host-gateway"
     environment:
@@ -42,6 +43,7 @@ services:
           "glm-5.3-flash:cloud": {
             "tools": true,
             "reasoning": true,
+            "interleaved": "reasoning_content", # it *should* have something to do with reasoning, but no idea..
             "variants": {
               "max":  { "reasoningEffort": "max" },
               "high": { "reasoningEffort": "high" }
@@ -83,6 +85,7 @@ services:
           "glm-5.3-flash:cloud": {
             "tools": true,
             "reasoning": true,
+            "interleaved": "reasoning_content", # it *should* have something to do with reasoning, but no idea..
             "variants": {
               "max":  { "reasoningEffort": "max" },
               "high": { "reasoningEffort": "high" }
