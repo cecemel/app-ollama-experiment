@@ -2,8 +2,10 @@
 
 Local AI agents. Default model `ollama-cloud/glm-5.2` (tool-calling capable). `small_model` stays on `ollama-local/llama3.2:3b` for titles/summaries.
 
-- `opencode` - coding agent ([opencode](https://opencode.ai/))
+- `opencode` - coding agent ([opencode](https://opencode.ai/)), runs as a headless server on `:4096` so openchamber can drive it
 - `opencode-light` - stripped opencode for small/local models. See `config/opencode-light/`
+- `openchamber` - web UI for opencode ([openchamber](https://openchamber.dev/)). Connects to the `opencode` server. See `config/openchamber/`
+- `openchamber-relay` - self-hosted [private relay](https://github.com/openchamber/openchamber-relay) so your paired devices reach openchamber from anywhere. See `config/openchamber-relay/`
 - `agent` - chat agent that can reach the web. See `config/agent/`
 - `llama-prism` - PrismML llama.cpp fork runtime (loads group-128 GGUFs Ollama can't). See `config/llama-prism/`
 - `ollama-local` - local [Ollama](https://ollama.ai/) model
@@ -26,11 +28,13 @@ services:
 
 ## Coding agent (opencode)
 
+`drc up -d opencode` runs opencode as a headless HTTP server on `:4096` (`opencode serve --hostname 0.0.0.0`). The port is not published; only other containers on the compose network (openchamber) reach it. Start an interactive TUI any time with:
+
 ```
 drc exec opencode opencode
 ```
 
-Config baked in at `config/opencode/opencode.base.json`. Knobs in `docker-compose.yml`: `OLLAMA_API_KEY`, `OLLAMA_CLOUD_MODELS`. Switch model per run:
+The TUI runs alongside the server without conflict. Config baked in at `config/opencode/opencode.base.json`. Knobs in `docker-compose.yml`: `OLLAMA_API_KEY`, `OLLAMA_CLOUD_MODELS`. Switch model per run:
 
 ```
 drc exec opencode opencode run --model ollama-local/llama3.2:3b "..."
@@ -58,6 +62,52 @@ drc exec opencode-light opencode
 ```
 
 Trimmed for small/local models. Same env knobs as `opencode`. See `config/opencode-light/` for what's stripped.
+
+## OpenChamber (web UI)
+
+[OpenChamber](https://openchamber.dev/) is the visual workspace around opencode. The `openchamber` service runs the web app and connects to the `opencode` server over the compose network, so bring opencode up first:
+
+```
+drc up -d opencode
+drc up -d openchamber
+```
+
+Open http://localhost:3000 and sign in with `OPENCHAMBER_UI_PASSWORD`. To pair a phone or reach it from outside your network, set `OPENCHAMBER_RELAY_URL` (see below) and pair a device in Settings -> Remote Instances.
+
+What's constant (in `docker-compose.yml`): `OPENCODE_HOST=http://opencode:4096`, `OPENCODE_SKIP_START=true`, `OPENCHAMBER_HOST=0.0.0.0`, the web UI port `3000`, and a placeholder `OPENCHAMBER_UI_PASSWORD`.
+
+What's deploy-specific (in `docker-compose.override.yml`): `OPENCHAMBER_RELAY_URL`, the public wss endpoint of your relay, and your real `OPENCHAMBER_UI_PASSWORD`:
+
+```yaml
+services:
+  openchamber:
+    environment:
+      OPENCHAMBER_RELAY_URL: "wss://relay.example.com/ws"
+      OPENCHAMBER_UI_PASSWORD: "your-secret"
+```
+
+openchamber does not run its own opencode (`OPENCODE_SKIP_START=true`); it drives the `opencode` service, so all providers, the chat-log proxy, `AGENTS.md`, and the custom tools stay single-sourced there.
+
+## OpenChamber Relay (self-hosted)
+
+Run the relay on a server so your paired devices reach openchamber from anywhere, without opening ports on the agent machine. Clone this repo on the server and:
+
+```
+drc up -d openchamber-relay
+```
+
+The image listens on `:80` inside the container (`EXPOSE 80`, `PORT=80`). The port is **not** published for you. Put your own TLS termination in front (Let's Encrypt / reverse proxy) and forward `wss://relay.example.com/ws` to the relay's port 80. Publish the port yourself, e.g. in `docker-compose.override.yml`:
+
+```yaml
+services:
+  openchamber-relay:
+    ports:
+      - "80:80"
+```
+
+The relay is a stateless E2EE broker: it forwards already-encrypted frames between your openchamber instance and paired devices, stores no secrets, and needs none. Health check: `GET /health` returns `{"ok":true,"service":"openchamber-relay"}`. Optional usage accounting: set `RELAY_USAGE_DB=/data/usage.sqlite` and mount `./data/openchamber-relay:/data`.
+
+Then point openchamber at it via `OPENCHAMBER_RELAY_URL` (see above). The same repo serves both roles: `drc up -d openchamber` on the agent machine, `drc up -d openchamber-relay` on the relay server.
 
 ## Host localhost gateway (localhost-gateway provider)
 

@@ -67,10 +67,11 @@ const k = p => Object.keys(cfg.provider[p].models).join(", ") || "(none)";
 console.log("opencode config ready; model: " + cfg.model + " | local: " + k("ollama-local") + " | cloud: " + k("ollama-cloud") + " | weave: " + k("weave") + " | prism: " + k("llama-prism") + " | gateway: " + k("localhost-gateway") + (process.env.OPENCODE_LOG_CHAT === "true" ? " | chat-logging: ON" : ""));
 '
 
-# With chat logging on, the proxy is the main process (logs traffic to docker logs and
-# keeps the container alive). Otherwise just idle.
+# Run opencode as a headless HTTP server so openchamber (and other clients) can
+# reach it on :4096. `drc exec opencode opencode` still starts a TUI alongside.
+# When chat logging is on, the proxy runs in the background; opencode serve is the
+# main process and keeps the container alive (the proxy logs to the same stdout).
 if [ "$OPENCODE_LOG_CHAT" = "true" ]; then
-  exec node /etc/opencode/proxy.js
-else
-  exec sleep infinity
+  node /etc/opencode/proxy.js &
 fi
+exec opencode serve --hostname 0.0.0.0 --port "${OPENCODE_SERVE_PORT:-4096}"
