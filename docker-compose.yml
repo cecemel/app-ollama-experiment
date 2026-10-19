@@ -131,9 +131,6 @@ services:
       # OPENCHAMBER_RELAY_URL: set in docker-compose.override.yml (deploy-specific)
     volumes:
       - ./data/openchamber:/root/.config/openchamber
-    ports:
-      - "3000:3000"
-
   openchamber-relay:
     image: cecemel/app-ollama-experiment-openchamber-relay:0.0.1
     build: ./config/openchamber-relay/
