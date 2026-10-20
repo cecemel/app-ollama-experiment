@@ -7,10 +7,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN apt-get update && apt-get install -y xclip wl-clipboard && rm -rf /var/lib/apt/lists/*
 
-# opencode CLI + language servers for JS/TS and Python. LSP is off by default and
-# these are not auto-installed, so bake them in. (opencode pinned - see https://opencode.ai)
+# opencode CLI (v2) + language servers for JS/TS and Python. LSP is off by
+# default and these are not auto-installed, so bake them in. OpenChamber 2.x
+# requires OpenCode >= 2.0.20. Pin it (see https://opencode.ai).
 RUN npm install -g \
-      opencode-ai@1.19.3 \
+      @opencode/cli@2.0.32 \
       typescript \
       typescript-language-server \
       pyright

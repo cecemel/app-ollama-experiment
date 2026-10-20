@@ -12,3 +12,8 @@ FROM ghcr.io/openchamber/openchamber-relay:latest
 ENV PORT=80
 
 EXPOSE 80
+
+# The upstream image hardcodes its healthcheck to :8788. Point it at the port
+# the relay actually listens on.
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
+  CMD wget -qO- http://127.0.0.1:80/health || exit 1

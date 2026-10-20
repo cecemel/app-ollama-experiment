@@ -28,7 +28,7 @@ services:
 
 ## Coding agent (opencode)
 
-`drc up -d opencode` runs opencode as a headless HTTP server on `:4096` (`opencode serve --hostname 0.0.0.0`). The port is not published; only other containers on the compose network (openchamber) reach it. Start an interactive TUI any time with:
+`drc up -d opencode` runs opencode v2 as a headless HTTP server on `:4096` (`opencode serve --hostname 0.0.0.0`). The port is not published; only other containers on the compose network (openchamber) reach it. Set `OPENCODE_SERVER_PASSWORD` in `docker-compose.override.yml`; opencode v2 requires basic auth on the API. Start an interactive TUI any time with:
 
 ```
 drc exec opencode opencode
@@ -72,21 +72,25 @@ drc up -d opencode
 drc up -d openchamber
 ```
 
-Open http://localhost:3000 and sign in with `OPENCHAMBER_UI_PASSWORD`. To pair a phone or reach it from outside your network, set `OPENCHAMBER_RELAY_URL` (see below) and pair a device in Settings -> Remote Instances.
+The UI listens on port `3000` inside the container. No host port is published by default; map it in `docker-compose.override.yml` if you want `http://localhost:3000`, then sign in with `OPENCHAMBER_UI_PASSWORD`. To pair a phone or reach it from outside your network, set `OPENCHAMBER_RELAY_URL` (see below) and pair a device in Settings -> Remote Instances.
 
-What's constant (in `docker-compose.yml`): `OPENCODE_HOST=http://opencode:4096`, `OPENCODE_SKIP_START=true`, `OPENCHAMBER_HOST=0.0.0.0`, the web UI port `3000`, and a placeholder `OPENCHAMBER_UI_PASSWORD`.
+What's constant (in `docker-compose.yml`): `OPENCODE_HOST=http://opencode:4096`, `OPENCODE_SKIP_START=true`, `OPENCHAMBER_HOST=0.0.0.0`, placeholder `OPENCODE_SERVER_PASSWORD` and `OPENCHAMBER_UI_PASSWORD` values.
 
-What's deploy-specific (in `docker-compose.override.yml`): `OPENCHAMBER_RELAY_URL`, the public wss endpoint of your relay, and your real `OPENCHAMBER_UI_PASSWORD`:
+What's deploy-specific (in `docker-compose.override.yml`): `OPENCHAMBER_RELAY_URL`, the public wss endpoint of your relay, and your real `OPENCHAMBER_UI_PASSWORD` and `OPENCODE_SERVER_PASSWORD` (the same value on both services):
 
 ```yaml
 services:
+  opencode:
+    environment:
+      OPENCODE_SERVER_PASSWORD: "your-secret"
   openchamber:
     environment:
+      OPENCODE_SERVER_PASSWORD: "your-secret"
       OPENCHAMBER_RELAY_URL: "wss://relay.example.com/ws"
       OPENCHAMBER_UI_PASSWORD: "your-secret"
 ```
 
-openchamber does not run its own opencode (`OPENCODE_SKIP_START=true`); it drives the `opencode` service, so all providers, the chat-log proxy, `AGENTS.md`, and the custom tools stay single-sourced there.
+openchamber does not run its own opencode (`OPENCODE_SKIP_START=true`); it drives the `opencode` service, so all providers, the chat-log proxy, `AGENTS.md`, and the custom tools stay single-sourced there. The openchamber image still ships the opencode v2 CLI because openchamber resolves it at startup, even in skip-start mode. OpenChamber 2.x requires OpenCode >= 2.0.20; both images pin `2.0.32`.
 
 ## OpenChamber Relay (self-hosted)
 
