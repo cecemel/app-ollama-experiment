@@ -29,6 +29,9 @@ services:
       OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT: "true"
       OPENCODE_LOG_CHAT: "true"
       CHAT_LOG_MAXLEN: "0"
+      # Password for `opencode serve`. Change it in docker-compose.override.yml;
+      # it must match the openchamber service's OPENCODE_SERVER_PASSWORD.
+      OPENCODE_SERVER_PASSWORD: "opencode"
       WEBFETCH_USER_AGENT: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0"
       OLLAMA_LOCAL_MODELS: |
         {
@@ -114,3 +117,32 @@ services:
       LLAMA_ALIAS: "bonsai-27b-1bit"
     volumes:
       - ./data/llama-prism:/data
+
+  openchamber:
+    image: cecemel/app-ollama-experiment-openchamber:0.0.1
+    build: ./config/openchamber/
+    # Web UI for opencode. Connects to the opencode service's server (opencode
+    # serve on :4096, see config/opencode/start.sh). Bring opencode up first.
+    # The relay URL is deploy-specific: set OPENCHAMBER_RELAY_URL in
+    # docker-compose.override.yml. Publish port 3000 yourself (e.g. in the
+    # override) if you want the UI on the host.
+    environment:
+      OPENCODE_HOST: "http://opencode:4096"
+      OPENCODE_SKIP_START: "true"
+      # Must match the opencode service's OPENCODE_SERVER_PASSWORD. Change it in
+      # docker-compose.override.yml.
+      OPENCODE_SERVER_PASSWORD: "opencode"
+      OPENCHAMBER_HOST: "0.0.0.0"
+      # Change me in docker-compose.override.yml (needed since we bind 0.0.0.0).
+      OPENCHAMBER_UI_PASSWORD: "openchamber"
+      # OPENCHAMBER_RELAY_URL: set in docker-compose.override.yml (deploy-specific)
+    volumes:
+      - ./data/openchamber:/root/.config/openchamber
+  openchamber-relay:
+    image: cecemel/app-ollama-experiment-openchamber-relay:0.0.1
+    build: ./config/openchamber-relay/
+    # Self-hosted OpenChamber private relay. Listens on :80 inside the container
+    # (EXPOSE 80 in the Dockerfile). Publish the port yourself (e.g. in
+    # docker-compose.override.yml) and put your own TLS termination in front, so
+    # clients reach it at wss://relay.example.com/ws. Stateless E2EE broker, no
+    # secrets. Optional usage accounting: set RELAY_USAGE_DB and mount /data.
